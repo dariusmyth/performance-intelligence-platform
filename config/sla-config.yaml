@@ -1,0 +1,11 @@
+sla:
+
+  avg_response_time_ms: 1000
+
+  p95_response_time_ms: 1500
+
+  p99_response_time_ms: 2500
+
+  error_rate_percent: 1
+
+  throughput_min_rps: 40

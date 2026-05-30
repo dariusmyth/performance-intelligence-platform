@@ -1,0 +1,45 @@
+test:
+  environment: staging
+
+  duration_minutes: 10
+
+  ramp_up_seconds: 60
+
+  think_time_ms: 2000
+
+scenarios:
+
+  happy_path:
+    endpoints:
+      - login
+      - search
+      - checkout
+
+    users: 50
+    duration_minutes: 10
+
+  peak_load:
+    endpoints:
+      - login
+      - search
+      - checkout
+
+    users: 300
+    duration_minutes: 15
+
+  stress:
+    endpoints:
+      - login
+      - search
+      - checkout
+
+    users: 500
+    duration_minutes: 20
+
+  spike:
+    users: 1000
+    ramp_up_seconds: 10
+
+  endurance:
+    users: 100
+    duration_minutes: 120

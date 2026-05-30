@@ -1,0 +1,16 @@
+scenarios:
+
+  happy_path:
+    description: Typical customer purchase flow
+
+  peak_load:
+    description: Black Friday traffic simulation
+
+  stress:
+    description: Find system breaking point
+
+  spike:
+    description: Sudden traffic burst
+
+  endurance:
+    description: 2 hour sustained traffic

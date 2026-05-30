@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Performance Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f5f7fa; }
+        .card { background: white; padding: 20px; margin: 10px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .grid { display: flex; flex-wrap: wrap; }
+        .metric { flex: 1; min-width: 200px; }
+        h2 { margin-bottom: 10px; }
+    </style>
+</head>
+
+<body>
+
+<h1>📊 Performance Executive Dashboard</h1>
+<p><b>Run ID:</b> {{ run_id }}</p>
+
+<div class="grid">
+
+<div class="card metric">
+<h2>Avg Response Time</h2>
+<p>{{ metrics.avg_response_time }} ms</p>
+</div>
+
+<div class="card metric">
+<h2>P95</h2>
+<p>{{ metrics.p95_response_time }} ms</p>
+</div>
+
+<div class="card metric">
+<h2>P99</h2>
+<p>{{ metrics.p99_response_time }} ms</p>
+</div>
+
+<div class="card metric">
+<h2>Error Rate</h2>
+<p>{{ metrics.error_rate }} %</p>
+</div>
+
+<div class="card metric">
+<h2>Throughput</h2>
+<p>{{ metrics.throughput }} req/s</p>
+</div>
+
+</div>
+
+<div class="card">
+<h2>📈 Trend (Last Runs)</h2>
+<canvas id="trendChart"></canvas>
+</div>
+
+<div class="card">
+<h2>🧠 Business Insights</h2>
+<pre>{{ report }}</pre>
+</div>
+
+<script>
+const trend = {{ trend | safe }};
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: trend.labels,
+        datasets: [
+            {
+                label: 'Avg Response Time',
+                data: trend.avg_response_time
+            },
+            {
+                label: 'P95',
+                data: trend.p95_response_time
+            },
+            {
+                label: 'P99',
+                data: trend.p99_response_time
+            }
+        ]
+    }
+});
+</script>
+
+</body>
+</html>
