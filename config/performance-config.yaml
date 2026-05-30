@@ -1,9 +1,9 @@
 test:
   environment: staging
 
-  duration_minutes: 10
+  default_duration_minutes: 10
 
-  ramp_up_seconds: 60
+  default_ramp_up_seconds: 60
 
   think_time_ms: 2000
 
