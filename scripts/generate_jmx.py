@@ -23,7 +23,7 @@ def load_yaml(path):
 
 
 # -----------------------------
-# JMeter XML helpers
+# XML helpers
 # -----------------------------
 
 def add_hash_tree(parent):
@@ -40,7 +40,6 @@ def create_test_plan(root):
         enabled="true"
     )
 
-    etree.SubElement(tp, "stringProp", name="TestPlan.comments")
     etree.SubElement(tp, "boolProp", name="TestPlan.functional_mode").text = "false"
     etree.SubElement(tp, "boolProp", name="TestPlan.serialize_threadgroups").text = "false"
 
@@ -71,20 +70,20 @@ def create_thread_group(parent, name, users, ramp, duration):
 # -----------------------------
 
 def extract_requests(items):
-    requests = []
+    reqs = []
 
-    for item in items:
-        if "request" in item:
-            requests.append(item)
+    for i in items:
+        if "request" in i:
+            reqs.append(i)
 
-        if "item" in item:
-            requests.extend(extract_requests(item["item"]))
+        if "item" in i:
+            reqs.extend(extract_requests(i["item"]))
 
-    return requests
+    return reqs
 
 
 # -----------------------------
-# HTTP Sampler
+# HTTP sampler
 # -----------------------------
 
 def create_http_sampler(parent, req):
@@ -133,7 +132,6 @@ def create_headers(parent, request):
 
     for h in headers:
         el = etree.SubElement(coll, "elementProp", elementType="Header")
-
         etree.SubElement(el, "stringProp", name="Header.name").text = h.get("key", "")
         etree.SubElement(el, "stringProp", name="Header.value").text = h.get("value", "")
 
@@ -167,13 +165,12 @@ def create_timer(parent, ms):
 
 
 # -----------------------------
-# MAIN GENERATOR
+# MAIN
 # -----------------------------
 
 def build_jmx():
 
     run_id = sys.argv[1]
-
     Path("jmx").mkdir(exist_ok=True)
 
     output_file = f"jmx/{run_id}_test_plan.jmx"
@@ -196,7 +193,7 @@ def build_jmx():
     think_time = config.get("test", {}).get("think_time_ms", 1000)
 
     # -----------------------------
-    # Scenario loop
+    # SCENARIOS
     # -----------------------------
     for scenario_name, scenario in scenarios.items():
 
@@ -208,14 +205,16 @@ def build_jmx():
             scenario.get("duration_minutes", default_duration)
         )
 
-        tg_tree = add_hash_tree(test_tree)
+        # IMPORTANT: correct attachment point
+        tg_tree = add_hash_tree(tg)
 
-        # -------------------------
-        # Requests loop
-        # -------------------------
+        # -----------------------------
+        # FIXED REQUEST LOOP (THIS IS THE KEY FIX)
+        # -----------------------------
         for req in requests:
 
             sampler = create_http_sampler(tg_tree, req)
+
             sampler_tree = add_hash_tree(tg_tree)
 
             create_headers(sampler_tree, req["request"])
