@@ -1,0 +1,463 @@
+{
+  "info": {
+    "_postman_id": "65f0071c-6870-4f60-a8ec-d9eb4931c717",
+    "name": "Local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55155305",
+    "_collection_link": "https://go.postman.co/collection/55155305-65f0071c-6870-4f60-a8ec-d9eb4931c717?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "CreateAccount",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Parse the JSON response body",
+              "const jsonData = pm.response.json();",
+              "",
+              "// Extract the accountId value",
+              "const accountId = jsonData.accountId;",
+              "",
+              "// Save it to an environment variable (recommended)",
+              "pm.globals.set(\"accountId\", accountId);",
+              "",
+              "// Log it to the console (Ctrl+Alt+C to view)",
+              "console.log(\"Extracted Account ID: \" + accountId);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": " {\n    \"name\":\"Testing POC\",\n    \"email\":\"testPoc@mail.com\",\n    \"password\":\"Testing123\",\n    \"phoneNumber\":\"043223423242\",\n    \"address\":\"Testing street, Test city, Mega Country\",\n    \"username\":\"testingAccount1\"\n }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8001/accounts/create",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "accounts",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "",
+              "// Access the nested token string",
+              "const myToken = jsonData.token.token;",
+              "",
+              "// Save to an environment variable",
+              "pm.globals.set(\"accessToken\", myToken);",
+              "",
+              "// Optional: Log to verify",
+              "console.log(\"Token extracted: \" + myToken);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": " {\n    \"password\":\"Testing123\",\n    \"username\":\"testingAccount1\"\n }"
+        },
+        "url": {
+          "raw": "http://localhost:8001/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Offers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8001/offers/getOffers?accountId={{accountId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "offers",
+            "getOffers"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "StoreCardDetails",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "",
+              "// Access the nested token string",
+              "const cardId = jsonData.cardId;",
+              "",
+              "// Save to an environment variable",
+              "pm.globals.set(\"cardId\", cardId);",
+              "",
+              "// Optional: Log to verify",
+              "console.log(\"Card ID extracted: \" + cardId);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"cardDetails\": {\n        \"cardName\": \"Visa test card\",\n        \"cardNumber\": \"411111111111111\",\n        \"cardExpiry\": \"1230\",\n        \"cardCvv\": \"123\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8001/accounts/paymentMethods/storeCardDetails?accountId={{accountId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "accounts",
+            "paymentMethods",
+            "storeCardDetails"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AddToCart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "",
+              "// Access the nested token string",
+              "const cartId = jsonData.cartId;",
+              "",
+              "// Save to an environment variable",
+              "pm.globals.set(\"cartId\", cartId);",
+              "",
+              "// Optional: Log to verify",
+              "console.log(\"Cart ID extracted: \" + cartId);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orders\": [\n        {\n            \"productName\":  \"15% off on home appliances\",\n            \"offerId\": \"4\",\n            \"orderAmount\": 100.00\n        },\n        {\n            \"offerId\": 3,\n            \"productName\": \"20% off on clothing\",\n            \"orderAmount\": 200.00\n        }\n    ]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/offers/addToCart?accountId={{accountId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "offers",
+            "addToCart"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Cart Details",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"cardDetails\":{\n        \"cardName\":\"Visa test card\",\n        \"cardNumber\":\"411111111111111\",\n        \"cardExpiry\":\"1230\",\n        \"cardCvv\":\"123\"\n    }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/offers/getCartDetails?accountId={{accountId}}&cartId={{cartId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "offers",
+            "getCartDetails"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            },
+            {
+              "key": "cartId",
+              "value": "{{cartId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Order history",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"offers\": [\n        {\n            \"productId\": 4,\n            \"offerId\": 4,\n            \"description\": \"15% off on home appliances\"\n        },\n        {\n            \"productId\": 3,\n            \"offerId\": 3,\n            \"description\": \"20% off on clothing\"\n        }\n    ]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/orders/getOrderHistory?accountId={{accountId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "orders",
+            "getOrderHistory"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Make Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"cardDetails\":{\n        \"cardId\":\"{{cardId}}\"\n    },\n    \"cartId\":\"\",\n    \"amount\":30.00,\n    \"accountId\":{{accountId}},\n    \"token\":\"{{accessToken}}\"\n   \n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/payments/makePayment?accountId={{accountId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "payments",
+            "makePayment"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Payment Status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8001/payments/getPaymentStatus?accountId={{accountId}}&paymentId={{paymentId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8001",
+          "path": [
+            "payments",
+            "getPaymentStatus"
+          ],
+          "query": [
+            {
+              "key": "accountId",
+              "value": "{{accountId}}"
+            },
+            {
+              "key": "paymentId",
+              "value": "{{paymentId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

@@ -1,5 +1,29 @@
+# Core Data Processing
 pandas==2.3.0
-jinja2==3.1.6
-openai==1.88.0
+numpy==2.3.0
+
+# YAML Config Support
+PyYAML==6.0.2
+
+# XML/JMX Generation
 lxml==5.4.0
+
+# HTML Dashboard Templating
+jinja2==3.1.6
+MarkupSafe==3.0.2
+
+# AI Report Generation
+openai==1.88.0
+
+# Optional Charts / Trend Images
 matplotlib==3.10.3
+seaborn==0.13.2
+
+# Date Handling
+python-dateutil==2.9.0.post0
+
+# HTTP Calls (future integrations)
+requests==2.32.4
+
+# Environment Variables
+python-dotenv==1.1.0
