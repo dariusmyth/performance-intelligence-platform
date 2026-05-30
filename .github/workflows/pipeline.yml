@@ -1,54 +1,125 @@
-name: Performance Pipeline
+name: Performance Intelligence Platform
 
 on:
+
   push:
+    branches:
+      - main
+
     paths-ignore:
       - "results/**"
+
   workflow_dispatch:
 
 jobs:
-  test:
+
+  performance-test:
+
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        run: pip install -r requirements.txt
+      - name: Upgrade Pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      #######################################################
+      # Install Fixed JMeter Version
+      #######################################################
 
       - name: Install JMeter
-        run: sudo apt-get update && sudo apt-get install -y jmeter
+        run: |
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+
+          tar -xzf apache-jmeter-5.6.3.tgz
+
+          echo "$PWD/apache-jmeter-5.6.3/bin" >> $GITHUB_PATH
+
+      - name: Verify JMeter
+        run: |
+          jmeter --version
+
+      #######################################################
+      # Generate Run ID
+      #######################################################
+
+      - name: Create Run ID
+        run: |
+          echo "RUN_ID=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+
+      #######################################################
+      # Generate JMX
+      #######################################################
 
       - name: Generate JMX
-        run: python scripts/generate_jmx.py
+        run: |
+          python scripts/generate_jmx.py
+
+      #######################################################
+      # Run Performance Test
+      #######################################################
 
       - name: Run JMeter
-        id: run
         run: |
-          RUN_ID=$(python scripts/run_jmeter.py)
-          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          python scripts/run_jmeter.py $RUN_ID
+
+      #######################################################
+      # Parse Results
+      #######################################################
 
       - name: Parse JTL
-        run: python scripts/parse_jtl.py $RUN_ID
+        run: |
+          python scripts/parse_jtl.py $RUN_ID
 
-      - name: Generate AI Report
-        run: python scripts/generate_business_report.py
+      #######################################################
+      # Generate AI Report
+      #######################################################
+
+      - name: Generate Business Report
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/generate_business_report.py
+
+      #######################################################
+      # Generate Dashboards
+      #######################################################
 
       - name: Generate Dashboard
-        run: python scripts/generate_dashboard.py
-
-      - name: Generate History Dashboard
-        run: python scripts/generate_history_dashboard.py
-
-      - name: Commit results
         run: |
+          python scripts/generate_dashboard.py
+
+      - name: Generate Historical Dashboard
+        run: |
+          python scripts/generate_history_dashboard.py
+
+      #######################################################
+      # Commit Results
+      #######################################################
+
+      - name: Commit Results
+        run: |
+
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+
           git add results/
+
           git commit -m "perf: run $RUN_ID" || exit 0
+
           git push

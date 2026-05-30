@@ -1,18 +1,45 @@
 import os
+import sys
 import subprocess
-from datetime import datetime
 
-RUN_ID = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-BASE = f"results/{RUN_ID}"
 
-os.makedirs(BASE, exist_ok=True)
+def main():
 
-cmd = f"""
-jmeter -n -t jmx/test_plan.jmx \
--l {BASE}/results.jtl \
--e -o {BASE}/jmeter-report
-"""
+    if len(sys.argv) < 2:
+        raise Exception(
+            "Usage: python run_jmeter.py <RUN_ID>"
+        )
 
-subprocess.run(cmd, shell=True, check=True)
+    run_id = sys.argv[1]
 
-print(RUN_ID)
+    result_dir = f"results/{run_id}"
+
+    os.makedirs(result_dir, exist_ok=True)
+
+    jtl_file = f"{result_dir}/results.jtl"
+
+    cmd = [
+        "jmeter",
+        "-n",
+        "-t",
+        "jmx/test_plan.jmx",
+        "-l",
+        jtl_file
+    ]
+
+    print(
+        f"Running JMeter for run {run_id}"
+    )
+
+    subprocess.run(
+        cmd,
+        check=True
+    )
+
+    print(
+        f"JTL created: {jtl_file}"
+    )
+
+
+if __name__ == "__main__":
+    main()
