@@ -13,24 +13,31 @@ def main():
     base = f"results/{run_id}"
     os.makedirs(base, exist_ok=True)
 
+    jmx_file = f"jmx/{run_id}_test_plan.jmx"
     jtl_file = f"{base}/results.jtl"
 
-    jmx_file = f"jmx/{run_id}_test_plan.jmx"
-
-    print(f"Running JMeter for {run_id}")
+    print(f"Running JMeter: {jmx_file}")
 
     cmd = [
         "jmeter",
         "-n",
-        "-t",
-        jmx_file,
-        "-l",
-        jtl_file
+        "-t", jmx_file,
+        "-l", jtl_file,
+        "-e",
+        "-o", f"{base}/jmeter-report"
     ]
 
-    subprocess.run(cmd, check=True)
+    # IMPORTANT: fail pipeline if JMeter fails
+    result = subprocess.run(cmd)
 
-    print(jtl_file)
+    if result.returncode != 0:
+        raise Exception("JMeter execution failed")
+
+    # Validate JTL exists and is not empty
+    if not os.path.exists(jtl_file) or os.path.getsize(jtl_file) == 0:
+        raise Exception("JTL file missing or empty")
+
+    print(f"JMeter completed: {jtl_file}")
 
 
 if __name__ == "__main__":
