@@ -13,23 +13,24 @@ def main():
     base = f"results/{run_id}"
     os.makedirs(base, exist_ok=True)
 
-    jtl_path = f"{base}/results.jtl"
+    jtl_file = f"{base}/results.jtl"
 
-    print(f"Starting JMeter run: {run_id}")
+    jmx_file = f"jmx/{run_id}_test_plan.jmx"
+
+    print(f"Running JMeter for {run_id}")
 
     cmd = [
         "jmeter",
         "-n",
         "-t",
-        "jmx/test_plan.jmx",
+        jmx_file,
         "-l",
-        jtl_path
+        jtl_file
     ]
 
     subprocess.run(cmd, check=True)
 
-    print(f"Completed JMeter run: {run_id}")
-    print(f"Results: {jtl_path}")
+    print(jtl_file)
 
 
 if __name__ == "__main__":

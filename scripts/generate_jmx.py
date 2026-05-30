@@ -1,11 +1,11 @@
 import json
 import yaml
+import sys
 from pathlib import Path
 from lxml import etree
 
 POSTMAN_FILE = "postman/collection.json"
 CONFIG_FILE = "config/performance-config.yaml"
-OUTPUT_FILE = "jmx/test_plan.jmx"
 
 
 # ---------------------------
@@ -27,7 +27,7 @@ def ensure_dir():
 
 
 # ---------------------------
-# Postman flatten
+# Flatten Postman
 # ---------------------------
 
 def extract_requests(items):
@@ -133,7 +133,6 @@ def create_headers(parent, request):
 
     for h in headers:
         el = etree.SubElement(coll, "elementProp", elementType="Header")
-
         etree.SubElement(el, "stringProp", name="Header.name").text = h.get("key", "")
         etree.SubElement(el, "stringProp", name="Header.value").text = h.get("value", "")
 
@@ -168,12 +167,19 @@ def create_timer(parent, ms):
 
 
 # ---------------------------
-# Main builder
+# MAIN
 # ---------------------------
 
 def build_jmx():
 
     ensure_dir()
+
+    if len(sys.argv) < 2:
+        raise Exception("RUN_ID required")
+
+    run_id = sys.argv[1]
+
+    output_file = f"jmx/{run_id}_test_plan.jmx"
 
     postman = load_json(POSTMAN_FILE)
     config = load_yaml(CONFIG_FILE)
@@ -219,13 +225,13 @@ def build_jmx():
             add_hash_tree(sampler_tree)
 
     etree.ElementTree(root).write(
-        OUTPUT_FILE,
+        output_file,
         pretty_print=True,
         xml_declaration=True,
         encoding="utf-8"
     )
 
-    print(f"Generated {OUTPUT_FILE}")
+    print(output_file)
 
 
 if __name__ == "__main__":
