@@ -6,17 +6,16 @@ import subprocess
 def main():
 
     if len(sys.argv) < 2:
-        raise Exception(
-            "Usage: python run_jmeter.py <RUN_ID>"
-        )
+        raise Exception("RUN_ID required")
 
     run_id = sys.argv[1]
 
-    result_dir = f"results/{run_id}"
+    base = f"results/{run_id}"
+    os.makedirs(base, exist_ok=True)
 
-    os.makedirs(result_dir, exist_ok=True)
+    jtl_path = f"{base}/results.jtl"
 
-    jtl_file = f"{result_dir}/results.jtl"
+    print(f"Starting JMeter run: {run_id}")
 
     cmd = [
         "jmeter",
@@ -24,21 +23,13 @@ def main():
         "-t",
         "jmx/test_plan.jmx",
         "-l",
-        jtl_file
+        jtl_path
     ]
 
-    print(
-        f"Running JMeter for run {run_id}"
-    )
+    subprocess.run(cmd, check=True)
 
-    subprocess.run(
-        cmd,
-        check=True
-    )
-
-    print(
-        f"JTL created: {jtl_file}"
-    )
+    print(f"Completed JMeter run: {run_id}")
+    print(f"Results: {jtl_path}")
 
 
 if __name__ == "__main__":
