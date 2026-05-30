@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Performance History</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial; background: #f4f6f9; padding: 20px; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; }
+    </style>
+</head>
+
+<body>
+
+<h1>📊 Performance History Dashboard</h1>
+
+<div class="card">
+    <canvas id="trendChart"></canvas>
+</div>
+
+<div class="card">
+    <h2>Run Summary Table</h2>
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Run</th>
+            <th>Avg</th>
+            <th>P95</th>
+            <th>P99</th>
+            <th>Error %</th>
+            <th>Throughput</th>
+        </tr>
+        
+        <tr>
+            <td>2026-05-30_20-30-00</td>
+            <td>nan</td>
+            <td>nan</td>
+            <td>nan</td>
+            <td>nan</td>
+            <td>nan</td>
+        </tr>
+        
+    </table>
+</div>
+
+<script>
+const data = {'labels': ['2026-05-30_20-30-00'], 'avg': [nan], 'p95': [nan], 'p99': [nan]};
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: data.labels,
+        datasets: [
+            { label: 'Avg', data: data.avg },
+            { label: 'P95', data: data.p95 },
+            { label: 'P99', data: data.p99 }
+        ]
+    }
+});
+</script>
+
+</body>
+</html>
