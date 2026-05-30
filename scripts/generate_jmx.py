@@ -8,9 +8,9 @@ POSTMAN_FILE = "postman/collection.json"
 CONFIG_FILE = "config/performance-config.yaml"
 
 
-# ---------------------------
+# -----------------------------
 # Loaders
-# ---------------------------
+# -----------------------------
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
@@ -22,30 +22,9 @@ def load_yaml(path):
         return yaml.safe_load(f)
 
 
-def ensure_dir():
-    Path("jmx").mkdir(exist_ok=True)
-
-
-# ---------------------------
-# Flatten Postman
-# ---------------------------
-
-def extract_requests(items):
-    requests = []
-
-    for item in items:
-        if "request" in item:
-            requests.append(item)
-
-        if "item" in item:
-            requests.extend(extract_requests(item["item"]))
-
-    return requests
-
-
-# ---------------------------
-# JMeter helpers
-# ---------------------------
+# -----------------------------
+# JMeter XML helpers
+# -----------------------------
 
 def add_hash_tree(parent):
     return etree.SubElement(parent, "hashTree")
@@ -86,6 +65,27 @@ def create_thread_group(parent, name, users, ramp, duration):
 
     return tg
 
+
+# -----------------------------
+# Postman parsing
+# -----------------------------
+
+def extract_requests(items):
+    requests = []
+
+    for item in items:
+        if "request" in item:
+            requests.append(item)
+
+        if "item" in item:
+            requests.extend(extract_requests(item["item"]))
+
+    return requests
+
+
+# -----------------------------
+# HTTP Sampler
+# -----------------------------
 
 def create_http_sampler(parent, req):
     request = req["request"]
@@ -133,6 +133,7 @@ def create_headers(parent, request):
 
     for h in headers:
         el = etree.SubElement(coll, "elementProp", elementType="Header")
+
         etree.SubElement(el, "stringProp", name="Header.name").text = h.get("key", "")
         etree.SubElement(el, "stringProp", name="Header.value").text = h.get("value", "")
 
@@ -148,7 +149,6 @@ def create_assertion(parent):
     )
 
     etree.SubElement(a, "stringProp", name="Assertion.test_field").text = "Assertion.response_code"
-    etree.SubElement(a, "collectionProp", name="Asserion.test_strings")
 
     return a
 
@@ -166,18 +166,15 @@ def create_timer(parent, ms):
     etree.SubElement(t, "stringProp", name="ConstantTimer.delay").text = str(ms)
 
 
-# ---------------------------
-# MAIN
-# ---------------------------
+# -----------------------------
+# MAIN GENERATOR
+# -----------------------------
 
 def build_jmx():
 
-    ensure_dir()
-
-    if len(sys.argv) < 2:
-        raise Exception("RUN_ID required")
-
     run_id = sys.argv[1]
+
+    Path("jmx").mkdir(exist_ok=True)
 
     output_file = f"jmx/{run_id}_test_plan.jmx"
 
@@ -186,7 +183,7 @@ def build_jmx():
 
     requests = extract_requests(postman.get("item", []))
 
-    root = etree.Element("jmeterTestPlan", version="1.2", jmeter="5.6.3")
+    root = etree.Element("jmeterTestPlan", version="1.2")
     root_ht = add_hash_tree(root)
 
     create_test_plan(root_ht)
@@ -198,18 +195,24 @@ def build_jmx():
     default_ramp = config.get("test", {}).get("default_ramp_up_seconds", 60)
     think_time = config.get("test", {}).get("think_time_ms", 1000)
 
-    for s_name, s in scenarios.items():
+    # -----------------------------
+    # Scenario loop
+    # -----------------------------
+    for scenario_name, scenario in scenarios.items():
 
         tg = create_thread_group(
             test_tree,
-            s_name,
-            s.get("users", 10),
-            s.get("ramp_up_seconds", default_ramp),
-            s.get("duration_minutes", default_duration)
+            scenario_name,
+            scenario.get("users", 10),
+            scenario.get("ramp_up_seconds", default_ramp),
+            scenario.get("duration_minutes", default_duration)
         )
 
         tg_tree = add_hash_tree(test_tree)
 
+        # -------------------------
+        # Requests loop
+        # -------------------------
         for req in requests:
 
             sampler = create_http_sampler(tg_tree, req)
@@ -226,9 +229,9 @@ def build_jmx():
 
     etree.ElementTree(root).write(
         output_file,
-        pretty_print=True,
+        encoding="utf-8",
         xml_declaration=True,
-        encoding="utf-8"
+        pretty_print=True
     )
 
     print(output_file)
